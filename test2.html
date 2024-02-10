@@ -3,15 +3,25 @@
 <head>
 <meta charset='utf-8' />
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="calender.css">
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Check for Notification support and request permission
+  if ("Notification" in window) {
+    Notification.requestPermission().then(permission => {
+      if (permission === "granted") {
+        console.log("Notification permission granted.");
+      }
+    });
+  }
+
   var calendarEl = document.getElementById('calendar');
-  var selectedEvent = null; // Variable to store the selected event
+  var selectedEvent = null;
 
   var calendar = new FullCalendar.Calendar(calendarEl, {
     headerToolbar: {
-      left: 'prev,next today',
+      left: 'prev,next,today',
       center: 'title',
       right: 'dayGridMonth,timeGridWeek,timeGridDay'
     },
@@ -30,17 +40,14 @@ document.addEventListener('DOMContentLoaded', function() {
       hour12: false
     },
     eventContent: function(arg) {
-      // Extract start and end times
-      var startTime = arg.event.startStr.substring(11, 16); // Extract time from ISO string
-      var endTime = arg.event.endStr.substring(11, 16); // Extract time from ISO string
+      var startTime = arg.event.startStr.substring(11, 16);
+      var endTime = arg.event.endStr.substring(11, 16);
       var timeDisplay = startTime + ' - ' + endTime;
 
-      // Assuming the description contains a simple link in the format "URL | Link Text"
       var descriptionParts = (arg.event.extendedProps.description || '').split('|');
       var linkUrl = descriptionParts[0]?.trim();
       var linkText = descriptionParts[1]?.trim();
 
-      // Create the HTML content with the link
       var contentHtml = `
         <b>${arg.event.title}</b><br>
         ${timeDisplay}<br>
@@ -53,18 +60,30 @@ document.addEventListener('DOMContentLoaded', function() {
       var title = prompt('Event Title:');
       if (title) {
         var description = prompt('Event Description (use format: URL | Link Text):');
-        calendar.addEvent({
+        var event = {
           title: title,
           start: arg.start,
           end: arg.end,
           allDay: arg.allDay,
           description: description,
-        });
+        };
+        calendar.addEvent(event);
+
+        // Schedule a notification for the event start time
+        var now = new Date();
+        var start = new Date(arg.start);
+        var delay = start.getTime() - now.getTime(); // Time until the event starts
+
+        if (delay > 0) {
+          setTimeout(() => {
+            showNotification('Event Starting', title + ' is starting now.');
+          }, delay);
+        }
       }
       calendar.unselect();
     },
     eventClick: function(arg) {
-      selectedEvent = arg.event; // Store the clicked event
+      selectedEvent = arg.event;
       alert('Event selected. Click the delete button to remove this event.');
     }
   });
@@ -75,13 +94,20 @@ document.addEventListener('DOMContentLoaded', function() {
     if (selectedEvent) {
       if(confirm('Are you sure you want to delete the selected event?')) {
         selectedEvent.remove();
-        selectedEvent = null; // Reset the selected event
+        selectedEvent = null;
       }
     } else {
       alert('Please select an event to delete.');
     }
   });
 });
+
+// Function to show a notification
+function showNotification(title, body) {
+  if (Notification.permission === "granted") {
+    new Notification(title, { body });
+  }
+}
 </script>
 <style>
   body {
@@ -103,5 +129,16 @@ document.addEventListener('DOMContentLoaded', function() {
 <button id="deleteEvent" style="margin-bottom: 10px;">Delete Selected Event</button>
 <div id='calendar'></div>
 </body>
+<button onclick="requestAndTestNotification()">Test Notification</button>
+<script>
+function requestAndTestNotification() {
+  Notification.requestPermission().then(permission => {
+    if (permission === "granted") {
+      new Notification("Test Notification", { body: "This is a test notification." });
+    } else {
+      console.log("Notification permission was denied.");
+    }
+  });
+}
+</script>
 </html>
-
