@@ -7,7 +7,6 @@
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Check for Notification support and request permission
   if ("Notification" in window) {
     Notification.requestPermission().then(permission => {
       if (permission === "granted") {
@@ -44,22 +43,30 @@ document.addEventListener('DOMContentLoaded', function() {
       var endTime = arg.event.endStr.substring(11, 16);
       var timeDisplay = startTime + ' - ' + endTime;
 
-      var descriptionParts = (arg.event.extendedProps.description || '').split('|');
-      var linkUrl = descriptionParts[0]?.trim();
-      var linkText = descriptionParts[1]?.trim();
+      var description = arg.event.extendedProps.description || '';
+      var isUrl = description.startsWith('http://') || description.startsWith('https://');
+      var contentHtml;
 
-      var contentHtml = `
-        <b>${arg.event.title}</b><br>
-        ${timeDisplay}<br>
-        ${linkUrl ? `<a href="${linkUrl}" target="_blank">${linkText || 'Link'}</a>` : ''}
-      `;
+      if (isUrl) {
+        contentHtml = `
+          <b>${arg.event.title}</b><br>
+          ${timeDisplay}<br>
+          <a href="${description}" target="_blank">Link</a>
+        `;
+      } else {
+        contentHtml = `
+          <b>${arg.event.title}</b><br>
+          ${timeDisplay}<br>
+          ${description}
+        `;
+      }
 
       return { html: contentHtml };
     },
     select: function(arg) {
       var title = prompt('Event Title:');
       if (title) {
-        var description = prompt('Event Description (use format: URL | Link Text):');
+        var description = prompt('Event Description:');
         var event = {
           title: title,
           start: arg.start,
@@ -69,10 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         calendar.addEvent(event);
 
-        // Schedule a notification for the event start time
         var now = new Date();
         var start = new Date(arg.start);
-        var delay = start.getTime() - now.getTime(); // Time until the event starts
+        var delay = start.getTime() - now.getTime();
 
         if (delay > 0) {
           setTimeout(() => {
@@ -102,13 +108,24 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// Function to show a notification
 function showNotification(title, body) {
-  if (Notification.permission !== "granted") {
-      Notification.requestPermission();
+  if (Notification.permission === "granted") {
+    new Notification(title, { body });
   } else {
-      new Notification(title, { body });
+    Notification.requestPermission().then(permission => {
+      if (permission === "granted") {
+        new Notification(title, { body });
+      }
+    });
   }
+}
+
+function requestAndTestNotification() {
+  Notification.requestPermission().then(permission => {
+    if (permission === "granted") {
+      new Notification("Test Notification", { body: "This is a test notification." });
+    }
+  });
 }
 </script>
 <style>
@@ -130,17 +147,6 @@ function showNotification(title, body) {
 <body>
 <button id="deleteEvent" style="margin-bottom: 10px;">Delete Selected Event</button>
 <div id='calendar'></div>
-</body>
 <button onclick="requestAndTestNotification()">Test Notification</button>
-<script>
-function requestAndTestNotification() {
-  Notification.requestPermission().then(permission => {
-    if (permission === "granted") {
-      new Notification("Test Notification", { body: "This is a test notification." });
-    } else {
-      console.log("Notification permission was denied.");
-    }
-  });
-}
-</script>
+</body>
 </html>
