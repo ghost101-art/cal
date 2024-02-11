@@ -1,2 +1,2 @@
 # cal
-calender
+Used https://fullcalendar.io/ an opensource calender 
