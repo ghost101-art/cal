@@ -1,65 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset='utf-8' />
-    <title>Class Calendar</title>
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css" rel="stylesheet" />
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-    <style>
-        body {
-            margin: 40px 10px;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-        }
-        #calendar {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-    </style>
+<meta charset='utf-8' />
+<title>FullCalendar with Cookie Support, Leave Confirmation, and Notifications</title>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="calender.css">
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script defer src="site-logic-1.js"></script>
+<script>
+// Utility functions for managing cookies
+</script>
+<style>
+  body {
+    margin: 40px 10px;
+    padding: 0;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 14px;
+  }
+  #calendar {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .fc-daygrid-event-title {
+    white-space: normal;
+  }
+</style>
 </head>
 <body>
-
+<button id="deleteEvent" style="margin-bottom: 10px;">Delete Selected Event</button>
 <div id='calendar'></div>
-
-<script>
-// Cookie functions from the "Pick-a-Class" page
-function getCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i = 0; i < ca.length; i++) {
-        var c = ca[i].trim();
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth'
-        // Add other FullCalendar configurations as needed
-    });
-
-    // Attempt to retrieve class details from cookies
-    var className = getCookie('className');
-    var startDate = getCookie('startDate');
-    var endDate = getCookie('endDate');
-
-    // If class details are found, add them to the calendar
-    if (className && startDate && endDate) {
-        calendar.addEvent({
-            title: className,
-            start: startDate,
-            end: endDate
-            // You can add more event properties here
-        });
-    }
-
-    calendar.render();
-});
-</script>
-
+<button id="saveEventsBtn" style="margin-top: 10px;">Save Events</button>
+<button id="loadEventsBtn" style="margin-top: 10px;">Load Events</button>
+<button onclick="requestAndTestNotification()">Test Notification</button>
 </body>
 </html>
-
