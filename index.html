@@ -39,30 +39,30 @@ document.addEventListener('DOMContentLoaded', function() {
       hour12: false
     },
     eventContent: function(arg) {
-      var startTime = arg.event.startStr.substring(11, 16);
-      var endTime = arg.event.endStr.substring(11, 16);
-      var timeDisplay = startTime + ' - ' + endTime;
+  var startTime = new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+  var endTime = new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+  var timeDisplay = startTime + ' - ' + endTime;
 
-      var description = arg.event.extendedProps.description || '';
-      var isUrl = description.startsWith('http://') || description.startsWith('https://');
-      var contentHtml;
+  var description = arg.event.extendedProps.description || '';
+  var isUrl = description.startsWith('http://') || description.startsWith('https://');
+  var contentHtml;
 
-      if (isUrl) {
-        contentHtml = `
-          <b>${arg.event.title}</b><br>
-          ${timeDisplay}<br>
-          <a href="${description}" target="_blank">Link</a>
-        `;
-      } else {
-        contentHtml = `
-          <b>${arg.event.title}</b><br>
-          ${timeDisplay}<br>
-          ${description}
-        `;
-      }
+  if (isUrl) {
+    contentHtml = `
+      <b>${arg.event.title}</b><br>
+      ${timeDisplay}<br>
+      <a href="${description}" target="_blank">Link</a>
+    `;
+  } else {
+    contentHtml = `
+      <b>${arg.event.title}</b><br>
+      ${timeDisplay}<br>
+      ${description}
+    `;
+  }
 
-      return { html: contentHtml };
-    },
+  return { html: contentHtml };
+},
     select: function(arg) {
       var title = prompt('Event Title:');
       if (title) {
